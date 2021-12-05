@@ -90,10 +90,13 @@ namespace Tic_Tac_Toe
                 var heap = Algorithm(Field);
                 List<Point> Hard = new List<Point>();
                 List<Point> Medium = new List<Point>();
+                List<Point> Easy = new List<Point>();
                 foreach (var item in heap)
                 {
                     if (item.Value == 'A')
                         Hard.Add(item.Key);
+                    else
+                        Easy.Add(item.Key);
                     Medium.Add(item.Key);
                 }
                 if (Mode)//Hard
