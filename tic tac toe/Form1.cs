@@ -94,8 +94,7 @@ namespace Tic_Tac_Toe
                 {
                     if (item.Value == 'A')
                         Hard.Add(item.Key);
-                    else
-                        Medium.Add(item.Key);
+                    Medium.Add(item.Key);
                 }
                 if (Mode)//Hard
                 {
