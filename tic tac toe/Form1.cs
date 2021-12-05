@@ -104,6 +104,8 @@ namespace Tic_Tac_Toe
                         Point hard = Hard[new Random().Next(Hard.Count)];
                         Field[hard.x, hard.y].PerformClick();
                     }
+                    else
+                        RandomizeEmpty();
                 }
                 else
                 {
@@ -112,6 +114,8 @@ namespace Tic_Tac_Toe
                         Point medium = Medium[new Random().Next(Medium.Count)];
                         Field[medium.x, medium.y].PerformClick();
                     }
+                    else
+                        RandomizeEmpty();
                 }
             }
         }
@@ -268,7 +272,7 @@ namespace Tic_Tac_Toe
             return cloneArray;
         }
 
-        private void FakeAlgorithm()
+        private void RandomizeEmpty()
         {
             List<Button> Fake = new List<Button>();
             foreach (var item in Field)
