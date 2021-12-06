@@ -19,7 +19,21 @@ namespace Tic_Tac_Toe
 
     public partial class Game : Form//game logic part
     {
-        private bool ?Mode = false;
+        public Game()
+        {
+            InitializeComponent();
+            Field[0, 0] = button1;
+            Field[0, 1] = button2;
+            Field[0, 2] = button3;
+            Field[1, 0] = button4;
+            Field[1, 1] = button5;
+            Field[1, 2] = button6;
+            Field[2, 0] = button7;
+            Field[2, 1] = button8;
+            Field[2, 2] = button9;
+        }
+
+        private bool Mode = false;
 
         private bool PlayerMove = true;
 
@@ -85,7 +99,7 @@ namespace Tic_Tac_Toe
                         Easy.Add(item.Key);
                     Medium.Add(item.Key);
                 }
-                if (Mode == true)//Hard
+                if (Mode)//Hard
                 {
                     if (Hard.Count > 0)
                     {
@@ -95,22 +109,12 @@ namespace Tic_Tac_Toe
                     else
                         RandomizeEmpty();
                 }
-                else if (Mode == false)
+                else
                 {
                     if (Medium.Count > 0)
                     {
                         Point medium = Medium[new Random().Next(Medium.Count)];
                         Field[medium.x, medium.y].PerformClick();
-                    }
-                    else
-                        RandomizeEmpty();
-                }
-                else
-                {
-                    if (Easy.Count > 0)
-                    {
-                        Point easy = Easy[new Random().Next(Easy.Count)];
-                        Field[easy.x, easy.y].PerformClick();
                     }
                     else
                         RandomizeEmpty();
@@ -292,7 +296,6 @@ namespace Tic_Tac_Toe
             button11.Enabled = false;
             button12.Click -= button12_Click;
             button13.Click -= button13_Click;
-            button14.Click -= button14_Click;
             if (PlayerMove)
             {
                 button.Text = PlayerS;

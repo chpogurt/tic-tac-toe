@@ -41,8 +41,6 @@
             this.button11 = new System.Windows.Forms.Button();
             this.button12 = new System.Windows.Forms.Button();
             this.button13 = new System.Windows.Forms.Button();
-            this.button14 = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button1
@@ -163,11 +161,11 @@
             // 
             this.button12.BackColor = System.Drawing.SystemColors.Menu;
             this.button12.Enabled = false;
-            this.button12.Font = new System.Drawing.Font("MV Boli", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.button12.Font = new System.Drawing.Font("MV Boli", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.button12.ForeColor = System.Drawing.Color.CornflowerBlue;
-            this.button12.Location = new System.Drawing.Point(258, 12);
+            this.button12.Location = new System.Drawing.Point(224, 12);
             this.button12.Name = "button12";
-            this.button12.Size = new System.Drawing.Size(28, 28);
+            this.button12.Size = new System.Drawing.Size(45, 45);
             this.button12.TabIndex = 11;
             this.button12.Text = "M";
             this.button12.UseVisualStyleBackColor = false;
@@ -176,47 +174,21 @@
             // button13
             // 
             this.button13.BackColor = System.Drawing.SystemColors.Menu;
-            this.button13.Font = new System.Drawing.Font("MV Boli", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.button13.Font = new System.Drawing.Font("MV Boli", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.button13.ForeColor = System.Drawing.Color.DeepPink;
-            this.button13.Location = new System.Drawing.Point(292, 12);
+            this.button13.Location = new System.Drawing.Point(279, 12);
             this.button13.Name = "button13";
-            this.button13.Size = new System.Drawing.Size(28, 28);
-            this.button13.TabIndex = 12;
+            this.button13.Size = new System.Drawing.Size(45, 45);
+            this.button13.TabIndex = 11;
             this.button13.Text = "H";
             this.button13.UseVisualStyleBackColor = false;
             this.button13.Click += new System.EventHandler(this.button13_Click);
             // 
-            // button14
-            // 
-            this.button14.BackColor = System.Drawing.SystemColors.Menu;
-            this.button14.Font = new System.Drawing.Font("MV Boli", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.button14.ForeColor = System.Drawing.SystemColors.Desktop;
-            this.button14.Location = new System.Drawing.Point(224, 12);
-            this.button14.Name = "button14";
-            this.button14.Size = new System.Drawing.Size(28, 28);
-            this.button14.TabIndex = 13;
-            this.button14.Text = "E";
-            this.button14.UseVisualStyleBackColor = false;
-            this.button14.Click += new System.EventHandler(this.button14_Click);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("MV Boli", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label1.ImageAlign = System.Drawing.ContentAlignment.TopLeft;
-            this.label1.Location = new System.Drawing.Point(224, 40);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(0, 20);
-            this.label1.TabIndex = 14;
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // Game
+            // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(334, 385);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.button14);
             this.Controls.Add(this.button13);
             this.Controls.Add(this.button12);
             this.Controls.Add(this.button11);
@@ -233,7 +205,6 @@
             this.Name = "Game";
             this.Text = "Tic Tac Toe";
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -252,8 +223,6 @@
         private System.Windows.Forms.Button button11;
         private System.Windows.Forms.Button button12;
         private System.Windows.Forms.Button button13;
-        private System.Windows.Forms.Button button14;
-        private System.Windows.Forms.Label label1;
     }
 }
 
