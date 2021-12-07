@@ -29,7 +29,7 @@ namespace Tic_Tac_Toe
 
         private readonly Button[,] Field = new Button[3, 3];
 
-        private readonly List<List<Point>> Points = new List<List<Point>>
+        private readonly List<List<Point>> FieldLines = new List<List<Point>>
         {
             new List<Point>
             {
@@ -98,8 +98,13 @@ namespace Tic_Tac_Toe
                 }
                 else
                 {
-                    Point easy = lEasy[new Random().Next(lEasy.Count)];
-                    Field[easy.x, easy.y].PerformClick();
+                    if (lEasy.Count > 0)
+                    {
+                        Point easy = lEasy[new Random().Next(lEasy.Count)];
+                        Field[easy.x, easy.y].PerformClick();
+                    }
+                    else
+                        RandomizeEmpty();
                 }
             }
             else
@@ -112,7 +117,7 @@ namespace Tic_Tac_Toe
             int freeCount = 0;
             Point xy = new Point();
             List<Point> result = new List<Point>();
-            foreach (var line in Points)
+            foreach (var line in FieldLines)
             {
                 foreach (var point in line)
                     switch (buttons[point.x, point.y].Text)
@@ -151,7 +156,7 @@ namespace Tic_Tac_Toe
         {
             array ??= Field;
             int countA = 0, countB = 0;
-            foreach (var line in Points)
+            foreach (var line in FieldLines)
             {
                 foreach (var item in line)
                 {
