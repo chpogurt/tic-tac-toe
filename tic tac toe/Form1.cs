@@ -19,7 +19,7 @@ namespace Tic_Tac_Toe
 
     public partial class Game : Form//game logic part
     {
-        private bool ?Mode = false;
+        private bool? Mode = false;
 
         private bool PlayerMove = true;
 
@@ -69,53 +69,41 @@ namespace Tic_Tac_Toe
         {
             var variable = Finder(Field);
             int point = new Random().Next(variable.Count);
+            var movesLeft = FindVoidPoint(Field);
             if (variable.Count > 0)
                 Field[variable[point].x, variable[point].y].PerformClick();
-            else
-            {
+            else if (movesLeft.Count >= 4)
+            {//алгоритм не даст результата если уже сыграно больше 5 шагов
                 var heap = Algorithm(Field);
-                List<Point> Hard = new List<Point>();
-                List<Point> Medium = new List<Point>();
-                List<Point> Easy = new List<Point>();
+                List<Point> lHard = new List<Point>();
+                List<Point> lMedium = new List<Point>();
+                List<Point> lEasy = new List<Point>();
                 foreach (var item in heap)
                 {
                     if (item.Value == 'A')
-                        Hard.Add(item.Key);
+                        lHard.Add(item.Key);
                     else
-                        Easy.Add(item.Key);
-                    Medium.Add(item.Key);
+                        lEasy.Add(item.Key);
+                    lMedium.Add(item.Key);
                 }
                 if (Mode == true)//Hard
                 {
-                    if (Hard.Count > 0)
-                    {
-                        Point hard = Hard[new Random().Next(Hard.Count)];
-                        Field[hard.x, hard.y].PerformClick();
-                    }
-                    else
-                        RandomizeEmpty();
+                    Point hard = lHard[new Random().Next(lHard.Count)];
+                    Field[hard.x, hard.y].PerformClick();
                 }
                 else if (Mode == false)
                 {
-                    if (Medium.Count > 0)
-                    {
-                        Point medium = Medium[new Random().Next(Medium.Count)];
-                        Field[medium.x, medium.y].PerformClick();
-                    }
-                    else
-                        RandomizeEmpty();
+                    Point medium = lMedium[new Random().Next(lMedium.Count)];
+                    Field[medium.x, medium.y].PerformClick();
                 }
                 else
                 {
-                    if (Easy.Count > 0)
-                    {
-                        Point easy = Easy[new Random().Next(Easy.Count)];
-                        Field[easy.x, easy.y].PerformClick();
-                    }
-                    else
-                        RandomizeEmpty();
+                    Point easy = lEasy[new Random().Next(lEasy.Count)];
+                    Field[easy.x, easy.y].PerformClick();
                 }
             }
+            else
+                RandomizeEmpty();
         }
 
         private List<Point> Finder(Button[,] buttons, bool defence = false)
@@ -188,7 +176,7 @@ namespace Tic_Tac_Toe
             }
             return false;
         }
-        
+
         /*
          * Исходя из моих наблюдений любая игра играется ровно до 5 хода,
          * начиная со второго хода решается будет построена вилка или нет
@@ -202,7 +190,7 @@ namespace Tic_Tac_Toe
         private Dictionary<Point, char> Algorithm(Button[,] array, string symbol = "O", int loop = 0)
         {
             Dictionary<Point, char> result = new Dictionary<Point, char>();
-            var voidArray = CopyArray(array);
+            var voidArray = FindVoidPoint(array);
             Button[,] assumption = new Button[3, 3];
             for (int i = 0; i < 3; i++)
                 for (int j = 0; j < 3; j++)
@@ -233,13 +221,13 @@ namespace Tic_Tac_Toe
             }
             else
             {
-                
+
                 foreach (var item in Finder(assumption).Count == 0 ? voidArray : Finder(assumption))
                 {
                     assumption[item.x, item.y].Text = symbol;
                     var prediction = Finder(assumption, true);
                     if (prediction.Count > 1)
-                        result.Add(item, 'B'); 
+                        result.Add(item, 'B');
                     else if (loop < 3)
                     {
                         var s = Algorithm(assumption, PC, loop + 1);
@@ -260,7 +248,7 @@ namespace Tic_Tac_Toe
             }
         }
 
-        private static List<Point> CopyArray(Button[,] array)
+        private static List<Point> FindVoidPoint(Button[,] array)
         {
             List<Point> cloneArray = new List<Point>();
             for (int i = 0; i < array.GetLength(0); i++)
