@@ -1,5 +1,4 @@
 ﻿using System;
-
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
@@ -32,7 +31,7 @@ namespace Tic_Tac_Toe
         /// <summary>
         /// Вертикали, горизонтали и диагонали
         /// </summary>
-        private readonly List<List<Point>> linesList = new List<List<Point>>
+        private readonly List<List<Point>> FieldLines = new List<List<Point>>
         {
             new List<Point>
             {
