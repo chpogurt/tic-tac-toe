@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Reflection;
+using System.Windows.Forms;
 
 namespace Tic_Tac_Toe//каким магическим образом помесить ещё один кусок класса внутрь Form1.cs я не нашёл
 {
@@ -26,10 +29,10 @@ namespace Tic_Tac_Toe//каким магическим образом помес
             DefaultEvent.Add(button8_Click);
             Field[2, 2] = button9;
             DefaultEvent.Add(button9_Click);
-            button12.Click += new System.EventHandler(label1_udpate);
-            button13.Click += new System.EventHandler(label1_udpate);
-            button14.Click += new System.EventHandler(label1_udpate);
-            label1_udpate(this, null);
+            DefaultEvent.Add(button11_Click);
+            DefaultEvent.Add(button12_Click);
+            DefaultEvent.Add(button13_Click);
+            DefaultEvent.Add(button14_Click);
         }
 
         private readonly List<EventHandler> DefaultEvent = new List<EventHandler>();
@@ -57,7 +60,6 @@ namespace Tic_Tac_Toe//каким магическим образом помес
         private void button5_Click(object sender, EventArgs e)
         {
             ChangeField(button5, button5_Click);
-
         }
 
         private void button6_Click(object sender, EventArgs e)
@@ -111,17 +113,11 @@ namespace Tic_Tac_Toe//каким магическим образом помес
             button11.Click += new System.EventHandler(this.button11_Click);
             button11.Enabled = true;
             button12.Click -= new System.EventHandler(this.button12_Click);
-            button12.Click -= new EventHandler(this.label1_udpate);
             button12.Click += new System.EventHandler(this.button12_Click);
-            button12.Click += new EventHandler(this.label1_udpate);
             button13.Click -= new System.EventHandler(this.button13_Click);
-            button13.Click -= new EventHandler(this.label1_udpate);
             button13.Click += new System.EventHandler(this.button13_Click);
-            button13.Click += new EventHandler(this.label1_udpate);
             button14.Click -= new System.EventHandler(this.button14_Click);
-            button14.Click -= new EventHandler(this.label1_udpate);
             button14.Click += new System.EventHandler(this.button14_Click);
-            button14.Click += new EventHandler(this.label1_udpate);
         }//reset
 
         private void button11_Click(object sender, EventArgs e)
@@ -134,6 +130,7 @@ namespace Tic_Tac_Toe//каким магическим образом помес
 
         private void button12_Click(object sender, EventArgs e)
         {
+            label1.Text = "Medium";
             button12.Enabled = false;
             button13.Enabled = true;
             button14.Enabled = true;
@@ -142,6 +139,7 @@ namespace Tic_Tac_Toe//каким магическим образом помес
 
         private void button13_Click(object sender, EventArgs e)
         {
+            label1.Text = "Hard";
             button12.Enabled = true;
             button13.Enabled = false;
             button14.Enabled = true;
@@ -150,20 +148,22 @@ namespace Tic_Tac_Toe//каким магическим образом помес
 
         private void button14_Click(object sender, EventArgs e)
         {
+            label1.Text = "Easy";
             button12.Enabled = true;
             button13.Enabled = true;
             button14.Enabled = false;
             Mode = null;
         }//easy
 
-        private void label1_udpate(object sender, EventArgs e)
-        {
-            if (Mode == null)
-                label1.Text = "Easy";
-            else if (Mode == false)
-                label1.Text = "Medium";
-            else
-                label1.Text = "Hard";
-        }
+        //private void label1_udpate(object sender, EventArgs e)
+        //{
+        //    if (Mode == null)
+        //        label1.Text = "Easy";
+        //    else if (Mode == false)
+        //        label1.Text = "Medium";
+        //    else
+        //        label1.Text = "Hard";
+        //}
     }
 }
+
