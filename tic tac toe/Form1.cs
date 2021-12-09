@@ -80,6 +80,7 @@ namespace Tic_Tac_Toe
             else if (movesLeft.Count >= 4)
             {//алгоритм не даст результата если уже сыграно больше 5 шагов
                 var heap = Algorithm(Field);
+                List<Point> lHardAttack = new List<Point>();
                 List<Point> lHard = new List<Point>();
                 List<Point> lMedium = new List<Point>();
                 List<Point> lEasy = new List<Point>();
@@ -87,14 +88,24 @@ namespace Tic_Tac_Toe
                 {
                     if (item.Value == 'A')
                         lHard.Add(item.Key);
+                    else if (item.Value == 'S')
+                        lHardAttack.Add(item.Key);
                     else
                         lEasy.Add(item.Key);
                     lMedium.Add(item.Key);
                 }
                 if (Mode == true)//Hard
                 {
-                    Point hard = lHard[new Random().Next(lHard.Count)];
-                    Field[hard.x, hard.y].PerformClick();
+                    if(lHardAttack.Count > 0)
+                    {
+                        Point best = lHardAttack[new Random().Next(lHardAttack.Count)];
+                        Field[best.x, best.y].PerformClick();
+                    }
+                    else 
+                    {
+                        Point hard = lHard[new Random().Next(lHard.Count)];
+                        Field[hard.x, hard.y].PerformClick();
+                    }
                 }
                 else if (Mode == false)
                 {
@@ -147,11 +158,11 @@ namespace Tic_Tac_Toe
                             }
                             break;
                     }
-                if (countB == 2 && freeCount == 1 && mode == null ) //  O winer
+                if (countB == 2 && freeCount == 1 && mode == null) //  O winer
                 {
-                        result.Clear();
-                        result.Add(new Point(xy.x, xy.y));
-                        return result;
+                    result.Clear();
+                    result.Add(new Point(xy.x, xy.y));
+                    return result;
                 }
                 if (countB == 2 && freeCount == 1 && mode == false)
                     result.Add(new Point(xy.x, xy.y));
@@ -244,6 +255,12 @@ namespace Tic_Tac_Toe
                 if (loop == 0)
                     return result;
                 foreach (var item in result)
+                    if (item.Value == 'S')
+                    {
+                        result.Add(new Point(9, 9), 'S');
+                        return result;
+                    }
+                foreach (var item in result)
                     if (item.Value == 'A')
                     {
                         result.Add(new Point(9, 9), 'A');
@@ -256,6 +273,13 @@ namespace Tic_Tac_Toe
             {
                 foreach (var item in Finder(assumption).Count == 0 ? voidArray : Finder(assumption))
                 {
+                    var hole = Finder(assumption, false);
+                    if (hole.Count > 1)
+                    {
+                        result.Clear();
+                        result.Add(new Point(9, 9), 'S');
+                        return result;
+                    }
                     assumption[item.x, item.y].Text = symbol;
                     var prediction = Finder(assumption, true);
                     if (prediction.Count > 1)
@@ -275,7 +299,13 @@ namespace Tic_Tac_Toe
                         result.Add(new Point(9, 9), 'B');
                         return result;
                     }
-                result.Add(new Point(9, 9), 'A');
+                foreach (var item in result)
+                    if (item.Value == 'A')
+                    {
+                        result.Add(new Point(9, 9), 'A');
+                        return result;
+                    }
+                result.Add(new Point(9, 9), 'S');
                 return result;
             }
         }
@@ -347,7 +377,7 @@ namespace Tic_Tac_Toe
                 foreach (var item in Field)
                     item.Enabled = false;
             }
-            button.UseVisualStyleBackColor = false; 
+            button.UseVisualStyleBackColor = false;
             button.Click -= _event; //отписка события от кнопки
             if (!PlayerMove)
                 Search();
