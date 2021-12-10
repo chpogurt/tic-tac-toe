@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Tic_Tac_Toe
@@ -19,31 +19,20 @@ namespace Tic_Tac_Toe
 
     public partial class Game : Form//game logic part
     {
-        public Game()
-        {
-            InitializeComponent();
-            Field[0, 0] = button1;
-            Field[0, 1] = button2;
-            Field[0, 2] = button3;
-            Field[1, 0] = button4;
-            Field[1, 1] = button5;
-            Field[1, 2] = button6;
-            Field[2, 0] = button7;
-            Field[2, 1] = button8;
-            Field[2, 2] = button9;
-        }
-
-        private bool Mode = false;
+        private bool? Mode = false;
 
         private bool PlayerMove = true;
 
-        private string PlayerS = "X";
+        private string Player = "X";//TODO если дойдут руки, реализовать замену символов
 
         private string PC = "O";
 
         private readonly Button[,] Field = new Button[3, 3];
 
-        private readonly List<List<Point>> Points = new List<List<Point>>
+        /// <summary>
+        /// Вертикали, горизонтали и диагонали
+        /// </summary>
+        private readonly List<List<Point>> FieldLines = new List<List<Point>>
         {
             new List<Point>
             {
@@ -79,75 +68,95 @@ namespace Tic_Tac_Toe
             }
         };
 
-        private void Search()
+        /// <summary>
+        /// Ответный ход компьютера
+        /// </summary>
+        private void StepPC()
         {
             var variable = Finder(Field);
             int point = new Random().Next(variable.Count);
+            var movesLeft = FindVoidPoint(Field);
             if (variable.Count > 0)
                 Field[variable[point].x, variable[point].y].PerformClick();
-            else
-            {
+            else if (movesLeft.Count >= 4)
+            {//алгоритм не даст результата если уже сыграно больше 5 шагов
                 var heap = Algorithm(Field);
-                List<Point> Hard = new List<Point>();
-                List<Point> Medium = new List<Point>();
-                foreach (var item in heap)
+                var bestWay = heap.Where(x => x.Value == 'S').Select(x => x.Key).ToList();    
+                var goodWay = heap.Where(x => x.Value == 'A').Select(x => x.Key).ToList();
+                var badWay = heap.Where(x => x.Value == 'B').Select(x => x.Key).ToList();
+                var allWay = heap.Select(x => x.Key).ToList(); 
+                if (Mode == true)//Hard
                 {
-                    if (item.Value == 'A')
-                        Hard.Add(item.Key);
+                    if (bestWay.Count > 0)
+                        Action(bestWay);
                     else
-                        Medium.Add(item.Key);
+                        Action(goodWay);
                 }
-                if (Mode)//Hard
-                {
-                    if (Hard.Count > 0)
-                    {
-                        Point hard = Hard[new Random().Next(Hard.Count)];
-                        Field[hard.x, hard.y].PerformClick();
-                    }
-                }
+                else if (Mode == false)
+                    Action(allWay);
                 else
                 {
-                    if (Medium.Count > 0)
-                    {
-                        Point medium = Medium[new Random().Next(Medium.Count)];
-                        Field[medium.x, medium.y].PerformClick();
-                    }
+                    if (badWay.Count > 0)
+                        Action(badWay);
+                    else
+                        Action(); // иногда случается, что плохих ходов нет
                 }
+            }
+            else
+                Action(); // все ходы после 5го
+        }
+
+        /// <summary>
+        /// Выбор случайного хода из списка переданных, либо случайный ход
+        /// </summary>
+        /// <param name="way"></param>
+        private void Action(List<Point> way = null)
+        {
+            if (way == null)
+                RandomizeEmpty();
+            else
+            {
+                Point point = way[new Random().Next(way.Count)];
+                Field[point.x, point.y].PerformClick();
             }
         }
 
-        private List<Point> Finder(Button[,] buttons, bool defence = false)
+        /// <summary>
+        /// Проверяет вертикали, горизонтали и диагонали на предмет опасных ситуаций
+        /// </summary>
+        /// <param name="buttons"> Поле для проверки.</param>
+        /// <param name="mode"> null- дефолтный, false- только вилки "O", true- только вилки "X".</param>
+        /// <returns>Возвращает список возможных ходов, в том числе пустой.</returns>
+        private List<Point> Finder(Button[,] buttons, bool? mode = null)
         {
             int countA = 0, countB = 0;
             int freeCount = 0;
             Point xy = new Point();
             List<Point> result = new List<Point>();
-            foreach (var line in Points)
+            foreach (var line in FieldLines)
             {
                 foreach (var point in line)
-                    switch (buttons[point.x, point.y].Text)
+                {
+                    if (buttons[point.x, point.y].Text == Player)
+                        countA++;
+                    else if (buttons[point.x, point.y].Text == PC)
+                        countB++;
+                    else if(buttons[point.x, point.y].Text == "")
                     {
-                        case "X":
-                            countA++;
-                            break;
-                        case "O":
-                            countB++;
-                            break;
-                        case "":
-                            {
-                                freeCount++;
-                                xy.x = point.x;
-                                xy.y = point.y;
-                            }
-                            break;
+                        freeCount++;
+                        xy.x = point.x;
+                        xy.y = point.y;
                     }
-                if (countB == 2 && freeCount == 1 && !defence) //  O winer
+                }
+                if (countB == 2 && freeCount == 1 && mode == null) //  PC winer
                 {
                     result.Clear();
                     result.Add(new Point(xy.x, xy.y));
                     return result;
                 }
-                if (countA == 2 & freeCount == 1)
+                if (countB == 2 && freeCount == 1 && mode == false)
+                    result.Add(new Point(xy.x, xy.y));
+                if (countA == 2 & freeCount == 1 && (mode == null || mode == true))
                     result.Add(new Point(xy.x, xy.y));
                 countA = 0;
                 countB = 0;
@@ -157,28 +166,27 @@ namespace Tic_Tac_Toe
             return result;
         }
 
-        private bool Final(Button[,] array = null, char mode = 'b') //both , X, Y
+        /// <summary>
+        /// Проверят игровое поле на предмет завершения игры
+        /// </summary>
+        /// <param name="array">Массив для проверки</param>
+        /// <param name="mode">Ключи X/O ограничивают проверку одной из сторон, b(оба) - дефолт </param>
+        /// <returns>Возвращает true если игра завершена</returns>
+        private bool Final(Button[,] array = null, char mode = 'b') //both , X, O
         {
             array ??= Field;
             int countA = 0, countB = 0;
-            foreach (var line in Points)
+            foreach (var line in FieldLines)
             {
                 foreach (var item in line)
                 {
-                    switch (array[item.x, item.y].Text)
-                    {
-                        case "X":
-                            countA++;
-                            break;
-                        case "O":
-                            countB++;
-                            break;
-                        default:
-                            break;
-                    }
+                    if (array[item.x, item.y].Text == Player)
+                        countA++;
+                    else if (array[item.x, item.y].Text == PC)
+                        countB++;
                     if (countA == 3 && (mode == 'b' || mode == 'X'))
                         return true;
-                    if (countB == 3 && (mode == 'b' || mode == 'Y'))
+                    if (countB == 3 && (mode == 'b' || mode == 'O'))
                         return true;
                 }
                 countA = 0;
@@ -187,10 +195,18 @@ namespace Tic_Tac_Toe
             return false;
         }
 
-        private Dictionary<Point, char> Algorithm(Button[,] array, string symbol = "O", int loop = 0)
+
+        /// <summary>
+        /// Просчитывает ходы на 4 шага вперёд, рекурсионный перебор
+        /// </summary>
+        /// <param name="array">Массив на просчёт</param>
+        /// <param name="pc">Не трогать. Аргумент хода(ИИ / Игрок) </param>
+        /// <param name="loop">Не трогать. Текущее погружение рекурсии</param>
+        /// <returns>Возвращает словарь возможных ходов с ключом качества данного хода</returns>
+        private Dictionary<Point, char> Algorithm(Button[,] array, bool pc = true, int loop = 0)
         {
             Dictionary<Point, char> result = new Dictionary<Point, char>();
-            var voidArray = CopyArray(array);
+            var voidArray = FindVoidPoint(array);
             Button[,] assumption = new Button[3, 3];
             for (int i = 0; i < 3; i++)
                 for (int j = 0; j < 3; j++)
@@ -198,57 +214,59 @@ namespace Tic_Tac_Toe
                     {
                         Text = array[i, j].Text
                     };
-            if (symbol == PC)
+            var variable = Finder(assumption);
+            if (pc)
             {
-                foreach (var item in Finder(assumption).Count == 0 ? voidArray : Finder(assumption))
+                foreach (var item in variable.Count == 0 ? voidArray : variable)
                 {
-                    assumption[item.x, item.y].Text = symbol;
-                    char s;
-                    s = Algorithm(assumption, PlayerS, loop + 1)[new Point(9, 9)];
-                    result.Add(item, s);
+                    assumption[item.x, item.y].Text = PC;
+                    var quality = Algorithm(assumption, false, loop + 1);
+                    result.Add(item, quality[new Point(9, 9)]);
                     assumption[item.x, item.y].Text = "";
                 }
                 if (loop == 0)
                     return result;
-                foreach (var item in result)
-                    if (item.Value == 'A')
-                    {
-                        result.Add(new Point(9, 9), 'A');
-                        return result;
-                    }
-                result.Add(new Point(9, 9), 'B');
-                return result;
+                else if (result.Where(x => x.Value == 'S').Count() > 0)
+                    return new Dictionary<Point, char>() { { new Point(9, 9), 'S' } };
+                else if (result.Where(x => x.Value == 'A').Count() > 0)
+                    return new Dictionary<Point, char>() { { new Point(9, 9), 'A' } };
+                return new Dictionary<Point, char>() { { new Point(9, 9), 'B' } };
             }
             else
             {
-                
-                foreach (var item in Finder(assumption).Count == 0 ? voidArray : Finder(assumption))
+                foreach (var item in variable.Count == 0 ? voidArray : variable)
                 {
-                    assumption[item.x, item.y].Text = symbol;
+                    var hole = Finder(assumption, false);
+                    if (hole.Count > 1)
+                        return new Dictionary<Point, char>() { { new Point(9, 9), 'S' } };
+                    assumption[item.x, item.y].Text = Player;
                     var prediction = Finder(assumption, true);
                     if (prediction.Count > 1)
-                        result.Add(item, 'B'); 
+                        result.Add(item, 'B');
                     else if (loop < 3)
                     {
-                        var s = Algorithm(assumption, PC, loop + 1);
-                        result.Add(item, s[new Point(9, 9)]);
+                        var quality = Algorithm(assumption, true, loop + 1);
+                        result.Add(item, quality[new Point(9, 9)]);
                     }
                     else
                         result.Add(item, 'A');
                     assumption[item.x, item.y].Text = "";
                 }
-                foreach (var item in result)
-                    if (item.Value == 'B')
-                    {
-                        result.Add(new Point(9, 9), 'B');
-                        return result;
-                    }
-                result.Add(new Point(9, 9), 'A');
-                return result;
+                if (result.Where(x => x.Value == 'B').Count() > 0)
+                    return new Dictionary<Point, char>() { { new Point(9, 9), 'B' } };
+                else if (result.Where(x => x.Value == 'A').Count() > 0)
+                    return new Dictionary<Point, char>() { { new Point(9, 9), 'A' } };
+                return new Dictionary<Point, char>() { { new Point(9, 9), 'S' } };
             }
-        }
+        }// координата 9 9 не является игровым полем и используется для обмена данными
 
-        private static List<Point> CopyArray(Button[,] array)
+
+        /// <summary>
+        /// Находит пустые клетки 
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns>Возвращает список допустимых ходов</returns>
+        private static List<Point> FindVoidPoint(Button[,] array)
         {
             List<Point> cloneArray = new List<Point>();
             for (int i = 0; i < array.GetLength(0); i++)
@@ -258,49 +276,61 @@ namespace Tic_Tac_Toe
             return cloneArray;
         }
 
-        private void FakeAlgorithm()
+        /// <summary>
+        /// Генератор случайного хода
+        /// </summary>
+        private void RandomizeEmpty()
         {
-            List<Button> Fake = new List<Button>();
+            List<Button> any = new List<Button>();
             foreach (var item in Field)
                 if (item.Text == "")
-                    Fake.Add(item);
-            int count = Fake.Count;
+                    any.Add(item);
+            int count = any.Count;
             if (count > 0)
-                Fake[new Random().Next(count - 1)].PerformClick();
-        } //самый вспомогательный костыль, всё ещё рабочий
+                any[new Random().Next(count - 1)].PerformClick();
+        }
 
+        /// <summary>
+        /// Первый ход за компьютером
+        /// </summary>
         private void FirstStepPC()
         {
             Field[new Random().Next(3), new Random().Next(3)].PerformClick();
         }
 
+        /// <summary>
+        /// Обработка игровой логики
+        /// </summary>
+        /// <param name="button">Нажатая кнопка</param>
+        /// <param name="_event">Событие вызвавшее метод</param>
         private void ChangeField(Button button, EventHandler _event)
         {
-            button11.Click -= button11_Click;
+            //button11.Click -= button11_Click;
             button11.Enabled = false;
             button12.Click -= button12_Click;
             button13.Click -= button13_Click;
-            if (PlayerMove)
+            button14.Click -= button14_Click;
+            if (PlayerMove) //установка флага игрока
             {
-                button.Text = PlayerS;
+                button.Text = Player;
                 button.ForeColor = Color.Red;
                 PlayerMove = false;
             }
-            else
+            else //установка флага компьютера
             {
                 button.Text = PC;
                 button.ForeColor = Color.Blue;
                 PlayerMove = true;
             }
-            if (Final(Field))
+            if (Final()) //проверка игры на завершение
             {
                 foreach (var item in Field)
                     item.Enabled = false;
             }
             button.UseVisualStyleBackColor = false;
-            button.Click -= _event;
+            button.Click -= _event; //отписка события от кнопки
             if (!PlayerMove)
-                Search();
+                StepPC();
         }
     }
 }
