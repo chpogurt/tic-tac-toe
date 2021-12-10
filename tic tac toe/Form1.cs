@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace Tic_Tac_Toe
@@ -22,7 +23,7 @@ namespace Tic_Tac_Toe
 
         private bool PlayerMove = true;
 
-        private string PlayerS = "X";
+        private string Player = "X";//TODO если дойдут руки, реализовать замену символов
 
         private string PC = "O";
 
@@ -80,51 +81,54 @@ namespace Tic_Tac_Toe
             else if (movesLeft.Count >= 4)
             {//алгоритм не даст результата если уже сыграно больше 5 шагов
                 var heap = Algorithm(Field);
-                List<Point> lHardAttack = new List<Point>();
-                List<Point> lHard = new List<Point>();
-                List<Point> lMedium = new List<Point>();
-                List<Point> lEasy = new List<Point>();
+                List<Point> bestWay = new List<Point>();
+                List<Point> goodWay = new List<Point>();
+                List<Point> allWay = new List<Point>();
+                List<Point> badWay = new List<Point>();
                 foreach (var item in heap)
                 {
                     if (item.Value == 'A')
-                        lHard.Add(item.Key);
+                        goodWay.Add(item.Key);
                     else if (item.Value == 'S')
-                        lHardAttack.Add(item.Key);
+                        bestWay.Add(item.Key);
                     else
-                        lEasy.Add(item.Key);
-                    lMedium.Add(item.Key);
+                        badWay.Add(item.Key);
+                    allWay.Add(item.Key);
                 }
                 if (Mode == true)//Hard
                 {
-                    if(lHardAttack.Count > 0)
-                    {
-                        Point best = lHardAttack[new Random().Next(lHardAttack.Count)];
-                        Field[best.x, best.y].PerformClick();
-                    }
-                    else 
-                    {
-                        Point hard = lHard[new Random().Next(lHard.Count)];
-                        Field[hard.x, hard.y].PerformClick();
-                    }
+                    if (bestWay.Count > 0)
+                        Action(bestWay);
+                    else
+                        Action(goodWay);
                 }
                 else if (Mode == false)
-                {
-                    Point medium = lMedium[new Random().Next(lMedium.Count)];
-                    Field[medium.x, medium.y].PerformClick();
-                }
+                    Action(allWay);
                 else
                 {
-                    if (lEasy.Count > 0)
-                    {
-                        Point easy = lEasy[new Random().Next(lEasy.Count)];
-                        Field[easy.x, easy.y].PerformClick();
-                    }
+                    if (badWay.Count > 0)
+                        Action(badWay);
                     else
-                        RandomizeEmpty();
+                        Action(); // иногда случается, что плохих ходов нет
                 }
             }
             else
+                Action(); // все ходы после 5го
+        }
+
+        /// <summary>
+        /// Выбор случайного хода из списка переданных, либо случайный ход
+        /// </summary>
+        /// <param name="way"></param>
+        private void Action(List<Point> way = null)
+        {
+            if (way == null)
                 RandomizeEmpty();
+            else
+            {
+                Point point = way[new Random().Next(way.Count)];
+                Field[point.x, point.y].PerformClick();
+            }
         }
 
         /// <summary>
@@ -142,22 +146,18 @@ namespace Tic_Tac_Toe
             foreach (var line in FieldLines)
             {
                 foreach (var point in line)
-                    switch (buttons[point.x, point.y].Text)
+                {
+                    if (buttons[point.x, point.y].Text == Player)
+                        countA++;
+                    else if (buttons[point.x, point.y].Text == PC)
+                        countB++;
+                    else if(buttons[point.x, point.y].Text == "")
                     {
-                        case "X":
-                            countA++;
-                            break;
-                        case "O":
-                            countB++;
-                            break;
-                        case "":
-                            {
-                                freeCount++;
-                                xy.x = point.x;
-                                xy.y = point.y;
-                            }
-                            break;
+                        freeCount++;
+                        xy.x = point.x;
+                        xy.y = point.y;
                     }
+                }
                 if (countB == 2 && freeCount == 1 && mode == null) //  O winer
                 {
                     result.Clear();
@@ -190,17 +190,10 @@ namespace Tic_Tac_Toe
             {
                 foreach (var item in line)
                 {
-                    switch (array[item.x, item.y].Text)
-                    {
-                        case "X":
-                            countA++;
-                            break;
-                        case "O":
-                            countB++;
-                            break;
-                        default:
-                            break;
-                    }
+                    if (array[item.x, item.y].Text == Player)
+                        countA++;
+                    else if (array[item.x, item.y].Text == PC)
+                        countB++;
                     if (countA == 3 && (mode == 'b' || mode == 'X'))
                         return true;
                     if (countB == 3 && (mode == 'b' || mode == 'O'))
@@ -212,26 +205,15 @@ namespace Tic_Tac_Toe
             return false;
         }
 
-        /*
-         * Исходя из моих наблюдений любая игра играется ровно до 5 хода,
-         * начиная со второго хода решается будет построена вилка или нет
-         * далее на 5 ходу она либо построена либо заблокирована 
-         * дальнейший ход игры не влияет на исход
-         * 
-         * что касательно логики АТАКИ, то алгоритм должен быть аналогичен
-         * этому, но просчитывать нужно с 3го по 5 ходы, то есть 3, а не 4 хода как тут
-         * а благоприятнымм считаются варианты при которых существую варианты построить вилку
-         */
-
 
         /// <summary>
         /// Просчитывает ходы на 4 шага вперёд, рекурсионный перебор
         /// </summary>
         /// <param name="array">Массив на просчёт</param>
-        /// <param name="symbol">Не трогать. Аргумент хода(ИИ / Игрок) </param>
+        /// <param name="pc">Не трогать. Аргумент хода(ИИ / Игрок) </param>
         /// <param name="loop">Не трогать. Текущее погружение рекурсии</param>
         /// <returns>Возвращает словарь возможных ходов с ключом качества данного хода</returns>
-        private Dictionary<Point, char> Algorithm(Button[,] array, string symbol = "O", int loop = 0)
+        private Dictionary<Point, char> Algorithm(Button[,] array, bool pc = true, int loop = 0)
         {
             Dictionary<Point, char> result = new Dictionary<Point, char>();
             var voidArray = FindVoidPoint(array);
@@ -242,69 +224,49 @@ namespace Tic_Tac_Toe
                     {
                         Text = array[i, j].Text
                     };
-            if (symbol == PC)
+            var variable = Finder(assumption);
+            if (pc)
             {
-                foreach (var item in Finder(assumption).Count == 0 ? voidArray : Finder(assumption))
+                foreach (var item in variable.Count == 0 ? voidArray : variable)
                 {
-                    assumption[item.x, item.y].Text = symbol;
-                    char s;
-                    s = Algorithm(assumption, PlayerS, loop + 1)[new Point(9, 9)];
-                    result.Add(item, s);
+                    assumption[item.x, item.y].Text = PC;
+                    var quality = Algorithm(assumption, false, loop + 1);
+                    result.Add(item, quality[new Point(9, 9)]);
                     assumption[item.x, item.y].Text = "";
                 }
                 if (loop == 0)
                     return result;
-                foreach (var item in result)
-                    if (item.Value == 'S')
-                    {
-                        result.Add(new Point(9, 9), 'S');
-                        return result;
-                    }
-                foreach (var item in result)
-                    if (item.Value == 'A')
-                    {
-                        result.Add(new Point(9, 9), 'A');
-                        return result;
-                    }
+                else if (result.Where(x => x.Value == 'S').Count() > 0)
+                    return new Dictionary<Point, char>() { { new Point(9, 9), 'S' } };
+                else if (result.Where(x => x.Value == 'A').Count() > 0)
+                    return new Dictionary<Point, char>() { { new Point(9, 9), 'A' } };
                 result.Add(new Point(9, 9), 'B');
                 return result;
             }
             else
             {
-                foreach (var item in Finder(assumption).Count == 0 ? voidArray : Finder(assumption))
+                foreach (var item in variable.Count == 0 ? voidArray : variable)
                 {
                     var hole = Finder(assumption, false);
                     if (hole.Count > 1)
-                    {
-                        result.Clear();
-                        result.Add(new Point(9, 9), 'S');
-                        return result;
-                    }
-                    assumption[item.x, item.y].Text = symbol;
+                        return new Dictionary<Point, char>() { { new Point(9, 9), 'S' } };
+                    assumption[item.x, item.y].Text = Player;
                     var prediction = Finder(assumption, true);
                     if (prediction.Count > 1)
                         result.Add(item, 'B');
                     else if (loop < 3)
                     {
-                        var s = Algorithm(assumption, PC, loop + 1);
-                        result.Add(item, s[new Point(9, 9)]);
+                        var quality = Algorithm(assumption, true, loop + 1);
+                        result.Add(item, quality[new Point(9, 9)]);
                     }
                     else
                         result.Add(item, 'A');
                     assumption[item.x, item.y].Text = "";
                 }
-                foreach (var item in result)
-                    if (item.Value == 'B')
-                    {
-                        result.Add(new Point(9, 9), 'B');
-                        return result;
-                    }
-                foreach (var item in result)
-                    if (item.Value == 'A')
-                    {
-                        result.Add(new Point(9, 9), 'A');
-                        return result;
-                    }
+                if (result.Where(x => x.Value == 'B').Count() > 0)
+                    return new Dictionary<Point, char>() { { new Point(9, 9), 'B' } };
+                else if (result.Where(x => x.Value == 'A').Count() > 0)
+                    return new Dictionary<Point, char>() { { new Point(9, 9), 'A' } };
                 result.Add(new Point(9, 9), 'S');
                 return result;
             }
@@ -338,7 +300,7 @@ namespace Tic_Tac_Toe
             int count = any.Count;
             if (count > 0)
                 any[new Random().Next(count - 1)].PerformClick();
-        } //самый вспомогательный костыль, всё ещё рабочий
+        }
 
         /// <summary>
         /// Первый ход за компьютером
@@ -355,14 +317,14 @@ namespace Tic_Tac_Toe
         /// <param name="_event">Событие вызвавшее метод</param>
         private void ChangeField(Button button, EventHandler _event)
         {
-            button11.Click -= button11_Click;
+            //button11.Click -= button11_Click;
             button11.Enabled = false;
             button12.Click -= button12_Click;
             button13.Click -= button13_Click;
             button14.Click -= button14_Click;
             if (PlayerMove) //установка флага игрока
             {
-                button.Text = PlayerS;
+                button.Text = Player;
                 button.ForeColor = Color.Red;
                 PlayerMove = false;
             }
@@ -372,7 +334,7 @@ namespace Tic_Tac_Toe
                 button.ForeColor = Color.Blue;
                 PlayerMove = true;
             }
-            if (Final(Field)) //проверка игры на завершение
+            if (Final()) //проверка игры на завершение
             {
                 foreach (var item in Field)
                     item.Enabled = false;

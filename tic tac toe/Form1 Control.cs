@@ -155,15 +155,6 @@ namespace Tic_Tac_Toe//каким магическим образом помес
             Mode = null;
         }//easy
 
-        //private void label1_udpate(object sender, EventArgs e)
-        //{
-        //    if (Mode == null)
-        //        label1.Text = "Easy";
-        //    else if (Mode == false)
-        //        label1.Text = "Medium";
-        //    else
-        //        label1.Text = "Hard";
-        //}
     }
 }
 
