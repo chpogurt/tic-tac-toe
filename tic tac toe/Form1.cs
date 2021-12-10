@@ -69,9 +69,9 @@ namespace Tic_Tac_Toe
         };
 
         /// <summary>
-        /// Поиск ответоного хода компьютером
+        /// Ответный ход компьютера
         /// </summary>
-        private void Search()
+        private void StepPC()
         {
             var variable = Finder(Field);
             int point = new Random().Next(variable.Count);
@@ -81,20 +81,10 @@ namespace Tic_Tac_Toe
             else if (movesLeft.Count >= 4)
             {//алгоритм не даст результата если уже сыграно больше 5 шагов
                 var heap = Algorithm(Field);
-                List<Point> bestWay = new List<Point>();
-                List<Point> goodWay = new List<Point>();
-                List<Point> allWay = new List<Point>();
-                List<Point> badWay = new List<Point>();
-                foreach (var item in heap)
-                {
-                    if (item.Value == 'A')
-                        goodWay.Add(item.Key);
-                    else if (item.Value == 'S')
-                        bestWay.Add(item.Key);
-                    else
-                        badWay.Add(item.Key);
-                    allWay.Add(item.Key);
-                }
+                var bestWay = heap.Where(x => x.Value == 'S').Select(x => x.Key).ToList();    
+                var goodWay = heap.Where(x => x.Value == 'A').Select(x => x.Key).ToList();
+                var badWay = heap.Where(x => x.Value == 'B').Select(x => x.Key).ToList();
+                var allWay = heap.Select(x => x.Key).ToList(); 
                 if (Mode == true)//Hard
                 {
                     if (bestWay.Count > 0)
@@ -158,7 +148,7 @@ namespace Tic_Tac_Toe
                         xy.y = point.y;
                     }
                 }
-                if (countB == 2 && freeCount == 1 && mode == null) //  O winer
+                if (countB == 2 && freeCount == 1 && mode == null) //  PC winer
                 {
                     result.Clear();
                     result.Add(new Point(xy.x, xy.y));
@@ -240,8 +230,7 @@ namespace Tic_Tac_Toe
                     return new Dictionary<Point, char>() { { new Point(9, 9), 'S' } };
                 else if (result.Where(x => x.Value == 'A').Count() > 0)
                     return new Dictionary<Point, char>() { { new Point(9, 9), 'A' } };
-                result.Add(new Point(9, 9), 'B');
-                return result;
+                return new Dictionary<Point, char>() { { new Point(9, 9), 'B' } };
             }
             else
             {
@@ -267,10 +256,9 @@ namespace Tic_Tac_Toe
                     return new Dictionary<Point, char>() { { new Point(9, 9), 'B' } };
                 else if (result.Where(x => x.Value == 'A').Count() > 0)
                     return new Dictionary<Point, char>() { { new Point(9, 9), 'A' } };
-                result.Add(new Point(9, 9), 'S');
-                return result;
+                return new Dictionary<Point, char>() { { new Point(9, 9), 'S' } };
             }
-        }
+        }// координата 9 9 не является игровым полем и используется для обмена данными
 
 
         /// <summary>
@@ -342,7 +330,7 @@ namespace Tic_Tac_Toe
             button.UseVisualStyleBackColor = false;
             button.Click -= _event; //отписка события от кнопки
             if (!PlayerMove)
-                Search();
+                StepPC();
         }
     }
 }
