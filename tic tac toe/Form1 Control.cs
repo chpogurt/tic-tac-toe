@@ -134,7 +134,7 @@ namespace Tic_Tac_Toe//каким магическим образом помес
             button12.Enabled = false;
             button13.Enabled = true;
             button14.Enabled = true;
-            Mode = false;
+            Mode = Difficulty.Meddium;
         }//medium
 
         private void button13_Click(object sender, EventArgs e)
@@ -143,7 +143,7 @@ namespace Tic_Tac_Toe//каким магическим образом помес
             button12.Enabled = true;
             button13.Enabled = false;
             button14.Enabled = true;
-            Mode = true;
+            Mode = Difficulty.Hard;
         }//hard
 
         private void button14_Click(object sender, EventArgs e)
@@ -152,7 +152,7 @@ namespace Tic_Tac_Toe//каким магическим образом помес
             button12.Enabled = true;
             button13.Enabled = true;
             button14.Enabled = false;
-            Mode = null;
+            Mode = Difficulty.Easy;
         }//easy
 
     }

@@ -6,6 +6,14 @@ using System.Windows.Forms;
 
 namespace Tic_Tac_Toe
 {
+    enum Difficulty
+    {
+        Easy,
+        Meddium,
+        Hard,
+        HardX
+    }
+
     struct Point
     {
         public Point(int x, int y)
@@ -19,7 +27,7 @@ namespace Tic_Tac_Toe
 
     public partial class Game : Form//game logic part
     {
-        private bool? Mode = false;
+        private Difficulty Mode = Difficulty.Meddium;
 
         private bool PlayerMove = true;
 
@@ -81,25 +89,27 @@ namespace Tic_Tac_Toe
             else if (movesLeft.Count >= 4)
             {//алгоритм не даст результата если уже сыграно больше 5 шагов
                 var heap = Algorithm(Field);
-                var bestWay = heap.Where(x => x.Value == 'S').Select(x => x.Key).ToList();    
-                var goodWay = heap.Where(x => x.Value == 'A').Select(x => x.Key).ToList();
-                var badWay = heap.Where(x => x.Value == 'B').Select(x => x.Key).ToList();
-                var allWay = heap.Select(x => x.Key).ToList(); 
-                if (Mode == true)//Hard
+                var bestWay = heap.Where(x => x.Value == Difficulty.HardX).Select(x => x.Key).ToList();
+                var goodWay = heap.Where(x => x.Value == Difficulty.Hard).Select(x => x.Key).ToList();
+                var badWay = heap.Where(x => x.Value == Difficulty.Meddium).Select(x => x.Key).ToList();
+                var allWay = heap.Select(x => x.Key).ToList();
+                switch (Mode)
                 {
-                    if (bestWay.Count > 0)
-                        Action(bestWay);
-                    else
-                        Action(goodWay);
-                }
-                else if (Mode == false)
-                    Action(allWay);
-                else
-                {
-                    if (badWay.Count > 0)
-                        Action(badWay);
-                    else
-                        Action(); // иногда случается, что плохих ходов нет
+                    case Difficulty.Hard:
+                        if (bestWay.Count > 0)
+                            Action(bestWay);
+                        else
+                            Action(goodWay);
+                        break;
+                    case Difficulty.Meddium:
+                        Action(allWay);
+                        break;
+                    default:
+                        if (badWay.Count > 0)
+                            Action(badWay);
+                        else
+                            Action(); // иногда случается, что плохих ходов нет
+                        break;
                 }
             }
             else
@@ -141,7 +151,7 @@ namespace Tic_Tac_Toe
                         countA++;
                     else if (buttons[point.x, point.y].Text == PC)
                         countB++;
-                    else if(buttons[point.x, point.y].Text == "")
+                    else if (buttons[point.x, point.y].Text == "")
                     {
                         freeCount++;
                         xy.x = point.x;
@@ -203,9 +213,9 @@ namespace Tic_Tac_Toe
         /// <param name="pc">Не трогать. Аргумент хода(ИИ / Игрок) </param>
         /// <param name="loop">Не трогать. Текущее погружение рекурсии</param>
         /// <returns>Возвращает словарь возможных ходов с ключом качества данного хода</returns>
-        private Dictionary<Point, char> Algorithm(Button[,] array, bool pc = true, int loop = 0)
+        private Dictionary<Point, Difficulty> Algorithm(Button[,] array, bool pc = true, int loop = 0)
         {
-            Dictionary<Point, char> result = new Dictionary<Point, char>();
+            Dictionary<Point, Difficulty> result = new Dictionary<Point, Difficulty>();
             var voidArray = FindVoidPoint(array);
             Button[,] assumption = new Button[3, 3];
             for (int i = 0; i < 3; i++)
@@ -226,11 +236,11 @@ namespace Tic_Tac_Toe
                 }
                 if (loop == 0)
                     return result;
-                else if (result.Where(x => x.Value == 'S').Count() > 0)
-                    return new Dictionary<Point, char>() { { new Point(9, 9), 'S' } };
-                else if (result.Where(x => x.Value == 'A').Count() > 0)
-                    return new Dictionary<Point, char>() { { new Point(9, 9), 'A' } };
-                return new Dictionary<Point, char>() { { new Point(9, 9), 'B' } };
+                else if (result.Where(x => x.Value == Difficulty.HardX).Count() > 0)
+                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.HardX } };
+                else if (result.Where(x => x.Value == Difficulty.Hard).Count() > 0)
+                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Hard } };
+                return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Meddium } };
             }
             else
             {
@@ -238,25 +248,25 @@ namespace Tic_Tac_Toe
                 {
                     var hole = Finder(assumption, false);
                     if (hole.Count > 1)
-                        return new Dictionary<Point, char>() { { new Point(9, 9), 'S' } };
+                        return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.HardX } };
                     assumption[item.x, item.y].Text = Player;
                     var prediction = Finder(assumption, true);
                     if (prediction.Count > 1)
-                        result.Add(item, 'B');
+                        result.Add(item, Difficulty.Meddium);
                     else if (loop < 3)
                     {
                         var quality = Algorithm(assumption, true, loop + 1);
                         result.Add(item, quality[new Point(9, 9)]);
                     }
                     else
-                        result.Add(item, 'A');
+                        result.Add(item, Difficulty.Hard);
                     assumption[item.x, item.y].Text = "";
                 }
-                if (result.Where(x => x.Value == 'B').Count() > 0)
-                    return new Dictionary<Point, char>() { { new Point(9, 9), 'B' } };
-                else if (result.Where(x => x.Value == 'A').Count() > 0)
-                    return new Dictionary<Point, char>() { { new Point(9, 9), 'A' } };
-                return new Dictionary<Point, char>() { { new Point(9, 9), 'S' } };
+                if (result.Where(x => x.Value == Difficulty.Meddium).Count() > 0)
+                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Meddium } };
+                else if (result.Where(x => x.Value == Difficulty.Hard).Count() > 0)
+                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Hard } };
+                return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.HardX } };
             }
         }// координата 9 9 не является игровым полем и используется для обмена данными
 
