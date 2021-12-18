@@ -81,39 +81,59 @@ namespace Tic_Tac_Toe
         /// </summary>
         private void StepPC()
         {
+            switch (Mode)
+            {
+                case Difficulty.Easy:
+                    Action();
+                    break;
+                case Difficulty.Meddium:
+                    MeddiumWay();
+                    break;
+                case Difficulty.Hard:
+                    HardWay();
+                    break;
+                default:
+                    throw new Exception("Mode содержит недопустимое для него значение Diffelicy.HardX");
+            }
+        }
+
+        private void MeddiumWay()
+        {
             var variable = Finder(Field);
-            int point = new Random().Next(variable.Count);
-            var movesLeft = FindVoidPoint(Field);
             if (variable.Count > 0)
+            {
+                int point = new Random().Next(variable.Count);
                 Field[variable[point].x, variable[point].y].PerformClick();
-            else if (movesLeft.Count >= 4)
-            {//алгоритм не даст результата если уже сыграно больше 5 шагов
+            }
+            else if (FindVoidPoint(Field).Count >= 4)
+            {
+                var allWay = Algorithm(Field).Select(x => x.Key).ToList();
+                Action(allWay);
+            }
+            else
+                Action();
+        }
+
+        private void HardWay()
+        {
+            var variable = Finder(Field);
+            if (variable.Count > 0)
+            {
+                int point = new Random().Next(variable.Count);
+                Field[variable[point].x, variable[point].y].PerformClick();
+            }
+            else if (FindVoidPoint(Field).Count >= 4)
+            {
                 var heap = Algorithm(Field);
                 var bestWay = heap.Where(x => x.Value == Difficulty.HardX).Select(x => x.Key).ToList();
                 var goodWay = heap.Where(x => x.Value == Difficulty.Hard).Select(x => x.Key).ToList();
-                var badWay = heap.Where(x => x.Value == Difficulty.Meddium).Select(x => x.Key).ToList();
-                var allWay = heap.Select(x => x.Key).ToList();
-                switch (Mode)
-                {
-                    case Difficulty.Hard:
-                        if (bestWay.Count > 0)
-                            Action(bestWay);
-                        else
-                            Action(goodWay);
-                        break;
-                    case Difficulty.Meddium:
-                        Action(allWay);
-                        break;
-                    default:
-                        if (badWay.Count > 0)
-                            Action(badWay);
-                        else
-                            Action(); // иногда случается, что плохих ходов нет
-                        break;
-                }
+                if (bestWay.Count > 0)
+                    Action(bestWay);
+                else
+                    Action(goodWay);
             }
             else
-                Action(); // все ходы после 5го
+                Action();
         }
 
         /// <summary>
