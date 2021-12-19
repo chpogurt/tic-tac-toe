@@ -93,7 +93,7 @@ namespace Tic_Tac_Toe
                     HardWay();
                     break;
                 default:
-                    throw new Exception("Mode содержит недопустимое для него значение Diffelicy.HardX");
+                    throw new Exception("Mode содержит недопустимое для него значение Difficulty.HardX");
             }
         }
 
@@ -104,11 +104,6 @@ namespace Tic_Tac_Toe
             {
                 int point = new Random().Next(variable.Count);
                 Field[variable[point].x, variable[point].y].PerformClick();
-            }
-            else if (FindVoidPoint(Field).Count >= 4)
-            {
-                var allWay = Algorithm(Field).Select(x => x.Key).ToList();
-                Action(allWay);
             }
             else
                 Action();
@@ -257,10 +252,10 @@ namespace Tic_Tac_Toe
                 if (loop == 0)
                     return result;
                 else if (result.Where(x => x.Value == Difficulty.HardX).Count() > 0)
-                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.HardX } };
+                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.HardX } };// вернуть ключ атаки
                 else if (result.Where(x => x.Value == Difficulty.Hard).Count() > 0)
-                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Hard } };
-                return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Meddium } };
+                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Hard } };// вернуть ключ защиты
+                return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Meddium } };// вернуть ключ слабости
             }
             else
             {
@@ -283,10 +278,10 @@ namespace Tic_Tac_Toe
                     assumption[item.x, item.y].Text = "";
                 }
                 if (result.Where(x => x.Value == Difficulty.Meddium).Count() > 0)
-                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Meddium } };
+                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Meddium } };// вернуть ключ атаки
                 else if (result.Where(x => x.Value == Difficulty.Hard).Count() > 0)
-                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Hard } };
-                return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.HardX } };
+                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Hard } };// вернуть ключ защиты
+                return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.HardX } };// вернуть ключ слабости
             }
         }// координата 9 9 не является игровым полем и используется для обмена данными
 
