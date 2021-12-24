@@ -119,7 +119,7 @@ namespace Tic_Tac_Toe
             }
             else if (FindVoidPoint(Field).Count >= 4)
             {
-                var heap = AnalysisPartPC(CopyField());
+                var heap = Algorithm(CopyField());
                 var bestWay = heap.Where(x => x.Value == Difficulty.HardX).Select(x => x.Key).ToList();
                 var goodWay = heap.Where(x => x.Value == Difficulty.Hard).Select(x => x.Key).ToList();
                 if (bestWay.Count > 0)
@@ -232,27 +232,29 @@ namespace Tic_Tac_Toe
             return result;
         }
 
-
-        /// <summary>
         /// Просчитывает ходы на 4 шага вперёд, рекурсионный перебор
         /// </summary>
         /// <param name="array">Массив на просчёт</param>
         /// <param name="pc">Не трогать. Аргумент хода(ИИ / Игрок) </param>
         /// <param name="loop">Не трогать. Текущее погружение рекурсии</param>
         /// <returns>Возвращает словарь возможных ходов с ключом качества данного хода</returns>
-        private Dictionary<Point, Difficulty> Algorithm(Button[,] assumption, bool pc = true, int loop = 0)
+        private Dictionary<Point, Difficulty> Algorithm(Button[,] assumption)
         {
-            Dictionary<Point, Difficulty> result = new Dictionary<Point, Difficulty>();
-            var voidArray = FindVoidPoint(assumption);
-            var variable = Finder(assumption);
-            if (pc)
+            return AnalysisPartOne(assumption);
+
+
+
+            Dictionary<Point, Difficulty> AnalysisPartOne(Button[,] assumption, int loop = 0)
             {
+                Dictionary<Point, Difficulty> result = new Dictionary<Point, Difficulty>();
+                var voidArray = FindVoidPoint(assumption);
+                var variable = Finder(assumption);
                 foreach (var item in variable.Count == 0 ? voidArray : variable)
                 {
-                    assumption[item.x, item.y].Text = PC;//1
-                    var quality = Algorithm(assumption, false, loop + 1);//2
-                    result.Add(item, quality[new Point(9, 9)]);//3
-                    assumption[item.x, item.y].Text = "";//4
+                    assumption[item.x, item.y].Text = PC;
+                    var quality = AnalysisPartTwo(assumption, loop + 1);
+                    result.Add(item, quality[new Point(9, 9)]);
+                    assumption[item.x, item.y].Text = "";
                 }
                 if (loop == 0)
                     return result;
@@ -262,25 +264,31 @@ namespace Tic_Tac_Toe
                     return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Hard } };// вернуть ключ защиты
                 return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Meddium } };// вернуть ключ слабости
             }
-            else
+
+
+
+            Dictionary<Point, Difficulty> AnalysisPartTwo(Button[,] assumption, int loop = 0)
             {
+                Dictionary<Point, Difficulty> result = new Dictionary<Point, Difficulty>();
+                var voidArray = FindVoidPoint(assumption);
+                var variable = Finder(assumption);
                 var hole = Finder(assumption, false);
                 if (hole.Count > 1)
                     return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.HardX } };
                 foreach (var item in variable.Count == 0 ? voidArray : variable)
                 {
-                    assumption[item.x, item.y].Text = Player;//1
+                    assumption[item.x, item.y].Text = Player;
                     var prediction = Finder(assumption, true);
                     if (prediction.Count > 1)
-                        result.Add(item, Difficulty.Meddium);//3
-                    else if (loop < 3) 
+                        result.Add(item, Difficulty.Meddium);
+                    else if (loop < 3)
                     {
-                        var quality = Algorithm(assumption, true, loop + 1);//2
-                        result.Add(item, quality[new Point(9, 9)]);//3
+                        var quality = AnalysisPartOne(assumption, loop + 1);
+                        result.Add(item, quality[new Point(9, 9)]);
                     }
                     else
-                        result.Add(item, Difficulty.Hard);//3
-                    assumption[item.x, item.y].Text = "";//4
+                        result.Add(item, Difficulty.Hard);
+                    assumption[item.x, item.y].Text = "";
                 }
                 if (result.Where(x => x.Value == Difficulty.Meddium).Count() > 0)
                     return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Meddium } };// вернуть ключ слабости
@@ -288,65 +296,7 @@ namespace Tic_Tac_Toe
                     return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Hard } };// вернуть ключ защиты
                 return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.HardX } };// вернуть ключ акаки
             }
-        }// координата 9 9 не является игровым полем и используется для обмена данными
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="assumption"></param>
-        /// <param name="loop"></param>
-        /// <returns>Возвращает словарь возможных ходов с ключом качества данного хода</returns>
-        private Dictionary<Point, Difficulty> AnalysisPartPC(Button[,] assumption, int loop = 0)
-        {
-            Dictionary<Point, Difficulty> result = new Dictionary<Point, Difficulty>();
-            var voidArray = FindVoidPoint(assumption);
-            var variable = Finder(assumption);
-            foreach (var item in variable.Count == 0 ? voidArray : variable)
-            {
-                assumption[item.x, item.y].Text = PC;//1
-                var quality = AnalysisPartPlayer(assumption, loop + 1);//2
-                result.Add(item, quality[new Point(9, 9)]);//3
-                assumption[item.x, item.y].Text = "";//4
-            }
-            if (loop == 0)
-                return result;
-            else if (result.Where(x => x.Value == Difficulty.HardX).Count() > 0)
-                return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.HardX } };// вернуть ключ атаки
-            else if (result.Where(x => x.Value == Difficulty.Hard).Count() > 0)
-                return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Hard } };// вернуть ключ защиты
-            return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Meddium } };// вернуть ключ слабости
         }
-
-        private Dictionary<Point, Difficulty> AnalysisPartPlayer(Button[,] assumption, int loop = 0)
-        {
-            Dictionary<Point, Difficulty> result = new Dictionary<Point, Difficulty>();
-            var voidArray = FindVoidPoint(assumption);
-            var variable = Finder(assumption);
-            var hole = Finder(assumption, false);
-            if (hole.Count > 1)
-                return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.HardX } };
-            foreach (var item in variable.Count == 0 ? voidArray : variable)
-            {
-                assumption[item.x, item.y].Text = Player;//1
-                var prediction = Finder(assumption, true);
-                if (prediction.Count > 1)
-                    result.Add(item, Difficulty.Meddium);//3
-                else if (loop < 3)
-                {
-                    var quality = AnalysisPartPC(assumption, loop + 1);//2
-                    result.Add(item, quality[new Point(9, 9)]);//3
-                }
-                else
-                    result.Add(item, Difficulty.Hard);//3
-                assumption[item.x, item.y].Text = "";//4
-            }
-            if (result.Where(x => x.Value == Difficulty.Meddium).Count() > 0)
-                return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Meddium } };// вернуть ключ слабости
-            else if (result.Where(x => x.Value == Difficulty.Hard).Count() > 0)
-                return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Hard } };// вернуть ключ защиты
-            return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.HardX } };// вернуть ключ акаки
-        }
-
 
 
         /// <summary>
@@ -422,3 +372,61 @@ namespace Tic_Tac_Toe
         }
     }
 }
+
+
+/*/// <summary>
+        /// Просчитывает ходы на 4 шага вперёд, рекурсионный перебор
+        /// </summary>
+        /// <param name="array">Массив на просчёт</param>
+        /// <param name="pc">Не трогать. Аргумент хода(ИИ / Игрок) </param>
+        /// <param name="loop">Не трогать. Текущее погружение рекурсии</param>
+        /// <returns>Возвращает словарь возможных ходов с ключом качества данного хода</returns>
+        private Dictionary<Point, Difficulty> Algorithm(Button[,] assumption, bool pc = true, int loop = 0)
+        {
+            Dictionary<Point, Difficulty> result = new Dictionary<Point, Difficulty>();
+            var voidArray = FindVoidPoint(assumption);
+            var variable = Finder(assumption);
+            if (pc)
+            {
+                foreach (var item in variable.Count == 0 ? voidArray : variable)
+                {
+                    assumption[item.x, item.y].Text = PC;//1
+                    var quality = Algorithm(assumption, false, loop + 1);//2
+                    result.Add(item, quality[new Point(9, 9)]);//3
+                    assumption[item.x, item.y].Text = "";//4
+                }
+                if (loop == 0)
+                    return result;
+                else if (result.Where(x => x.Value == Difficulty.HardX).Count() > 0)
+                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.HardX } };// вернуть ключ атаки
+                else if (result.Where(x => x.Value == Difficulty.Hard).Count() > 0)
+                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Hard } };// вернуть ключ защиты
+                return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Meddium } };// вернуть ключ слабости
+            }
+            else
+            {
+                var hole = Finder(assumption, false);
+                if (hole.Count > 1)
+                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.HardX } };
+                foreach (var item in variable.Count == 0 ? voidArray : variable)
+                {
+                    assumption[item.x, item.y].Text = Player;//1
+                    var prediction = Finder(assumption, true);
+                    if (prediction.Count > 1)
+                        result.Add(item, Difficulty.Meddium);//3
+                    else if (loop < 3) 
+                    {
+                        var quality = Algorithm(assumption, true, loop + 1);//2
+                        result.Add(item, quality[new Point(9, 9)]);//3
+                    }
+                    else
+                        result.Add(item, Difficulty.Hard);//3
+                    assumption[item.x, item.y].Text = "";//4
+                }
+                if (result.Where(x => x.Value == Difficulty.Meddium).Count() > 0)
+                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Meddium } };// вернуть ключ слабости
+                else if (result.Where(x => x.Value == Difficulty.Hard).Count() > 0)
+                    return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.Hard } };// вернуть ключ защиты
+                return new Dictionary<Point, Difficulty>() { { new Point(9, 9), Difficulty.HardX } };// вернуть ключ акаки
+            }
+        }// координата 9 9 не является игровым полем и используется для обмена данными */ 
