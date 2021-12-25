@@ -232,11 +232,10 @@ namespace Tic_Tac_Toe
             return result;
         }
 
+        /// <summary>
         /// Просчитывает ходы на 4 шага вперёд, рекурсионный перебор
         /// </summary>
-        /// <param name="array">Массив на просчёт</param>
-        /// <param name="pc">Не трогать. Аргумент хода(ИИ / Игрок) </param>
-        /// <param name="loop">Не трогать. Текущее погружение рекурсии</param>
+        /// <param name="assumption"></param>
         /// <returns>Возвращает словарь возможных ходов с ключом качества данного хода</returns>
         private Dictionary<Point, Difficulty> Algorithm(Button[,] assumption)
         {
@@ -345,9 +344,9 @@ namespace Tic_Tac_Toe
         {
             //button11.Click -= button11_Click;
             button11.Enabled = false;
-            button12.Click -= button12_Click;
-            button13.Click -= button13_Click;
-            button14.Click -= button14_Click;
+            ControlCondition.Remove(button12, button12_Click);
+            ControlCondition.Remove(button13, button13_Click);
+            ControlCondition.Remove(button14, button14_Click);
             if (PlayerMove) //установка флага игрока
             {
                 button.Text = Player;
@@ -366,7 +365,8 @@ namespace Tic_Tac_Toe
                     item.Enabled = false;
             }
             button.UseVisualStyleBackColor = false;
-            button.Click -= _event; //отписка события от кнопки
+            //button.Click -= _event; //отписка события от кнопки
+            ControlCondition.Remove(button, _event);
             if (!PlayerMove)
                 StepPC();
         }

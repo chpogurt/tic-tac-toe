@@ -1,4 +1,6 @@
-﻿namespace Tic_Tac_Toe
+﻿using SCE;
+
+namespace Tic_Tac_Toe
 {
     partial class Game
     {
