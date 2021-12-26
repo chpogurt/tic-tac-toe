@@ -92,7 +92,7 @@ namespace Tic_Tac_Toe//каким магическим образом помес
             }
             ControlCondition.LoadSave();
             button11.Enabled = true;
-
+            textBox1.Clear();
         }//reset
 
         private void button11_Click(object sender, EventArgs e)

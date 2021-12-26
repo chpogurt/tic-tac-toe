@@ -25,6 +25,27 @@ namespace Tic_Tac_Toe
         public int y;
     }
 
+    struct Info
+    {
+        private int Iteration;
+
+        public void Reset()
+        {
+            Iteration = 0;
+        }
+
+        public int GetCountIteration()
+        {
+            return Iteration;
+        }
+
+        public static Info operator ++(Info i)
+        {
+            i.Iteration += 1;
+            return i;
+        }
+    }
+
     public partial class Game : Form//game logic part
     {
         private Difficulty Mode = Difficulty.Meddium;
@@ -76,11 +97,14 @@ namespace Tic_Tac_Toe
             }
         };
 
+        private Info info = new Info();
+
         /// <summary>
         /// Ответный ход компьютера
         /// </summary>
         private void StepPC()
         {
+            textBox1.Clear();
             switch (Mode)
             {
                 case Difficulty.Easy:
@@ -102,6 +126,7 @@ namespace Tic_Tac_Toe
             var variable = Finder(Field);
             if (variable.Count > 0)
             {
+                textBox1.Text = $"Finder";
                 int point = new Random().Next(variable.Count);
                 Field[variable[point].x, variable[point].y].PerformClick();
             }
@@ -116,6 +141,7 @@ namespace Tic_Tac_Toe
             {
                 int point = new Random().Next(variable.Count);
                 Field[variable[point].x, variable[point].y].PerformClick();
+                textBox1.Text = $"Finder";
             }
             else if (FindVoidPoint(Field).Count >= 4)
             {
@@ -126,6 +152,9 @@ namespace Tic_Tac_Toe
                     Action(bestWay);
                 else
                     Action(goodWay);
+                int count = info.GetCountIteration();
+                textBox1.Text = $"Algorithm iteration count = {count}";
+                info.Reset();
             }
             else
                 Action();
@@ -138,7 +167,10 @@ namespace Tic_Tac_Toe
         private void Action(List<Point> way = null)
         {
             if (way == null)
+            {
+                textBox1.Text = $"Randomize";
                 RandomizeEmpty();
+            }
             else
             {
                 Point point = way[new Random().Next(way.Count)];
@@ -245,6 +277,7 @@ namespace Tic_Tac_Toe
 
             Dictionary<Point, Difficulty> AnalysisPartOne(Button[,] assumption, int loop = 0)
             {
+                info++;
                 Dictionary<Point, Difficulty> result = new Dictionary<Point, Difficulty>();
                 var voidArray = FindVoidPoint(assumption);
                 var variable = Finder(assumption);
@@ -268,6 +301,7 @@ namespace Tic_Tac_Toe
 
             Dictionary<Point, Difficulty> AnalysisPartTwo(Button[,] assumption, int loop = 0)
             {
+                info++;
                 Dictionary<Point, Difficulty> result = new Dictionary<Point, Difficulty>();
                 var voidArray = FindVoidPoint(assumption);
                 var variable = Finder(assumption);
@@ -369,6 +403,11 @@ namespace Tic_Tac_Toe
             ControlCondition.Remove(button, _event);
             if (!PlayerMove)
                 StepPC();
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
